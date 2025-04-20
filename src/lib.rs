@@ -63,17 +63,7 @@ impl Universe {
 				},
 			);
 		}
-		/*
-		let cells = (0..width * height)
-			.map(|i| {
-				if js_sys::Math::random() < 0.5 {
-					Cell::Alive
-				} else {
-					Cell::Dead
-				}
-			})
-			.collect();
-		*/
+
 		Universe {
 			width,
 			height,
@@ -121,17 +111,6 @@ impl Universe {
 				let cell = self.cells[idx];
 				let live_neighbors = self.live_neighbor_count(row, col);
 
-				/*let next_cell = match (cell, live_neighbors) {
-					(Cell::Alive, x) if x < 2 => Cell::Dead,
-
-					(Cell::Alive, 2) | (Cell::Alive, 3) => Cell::Alive,
-
-					(Cell::Alive, x) if x > 3 => Cell::Dead,
-
-					(Cell::Dead, 3) => Cell::Alive,
-
-					(otherwise, _) => otherwise,
-				};*/
 				next.set(
 					idx,
 					match (cell, live_neighbors) {
@@ -151,6 +130,7 @@ impl Universe {
 	pub fn width(&self) -> u32 {
 		self.width
 	}
+
 	pub fn height(&self) -> u32 {
 		self.height
 	}
