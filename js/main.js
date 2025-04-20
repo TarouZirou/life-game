@@ -2,8 +2,9 @@ import init, { Universe, Cell } from "../pkg/life_game.js";
 
 const wasm = await init("./pkg/life_game_bg.wasm");
 
+let animationId = null;
 const CELL_SIZE = 2;
-const GRID_COLOR = "#CCCCCC";
+
 const DEAD_COLOR = "#FFFFFF";
 const ALIVE_COLOR = "#000000";
 
@@ -12,28 +13,32 @@ const width = universe.width();
 const height = universe.height();
 
 const canvas = document.getElementById("life-game");
-canvas.width = (CELL_SIZE + 1) * width + 1;
-canvas.height = (CELL_SIZE + 1) * height + 1;
+canvas.width = CELL_SIZE * width;
+canvas.height = CELL_SIZE * height;
 
 const ctx = canvas.getContext("2d");
 
-const drawGrid = () => {
-	ctx.beginPath();
-	ctx.strokeStyle = GRID_COLOR;
+const isPaused = () => animationId === null;
 
-	//vert lines
-	for (let i = 0; i < width; i++) {
-		ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-		ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
-	}
-
-	//hori lines
-	for (let i = 0; i < height; i++) {
-		ctx.moveTo(0, i * (CELL_SIZE + 1) + 1);
-		ctx.lineTo((CELL_SIZE + 1) * width + 1, i * (CELL_SIZE + 1) + 1);
-	}
-	ctx.stroke();
+const playPauseButton = document.getElementById("play-pause");
+const play = () => {
+	playPauseButton.textContent = "⏸";
+	renderLoop();
 };
+
+const pause = () => {
+	playPauseButton.textContent = "▶";
+	cancelAnimationFrame(animationId);
+	animationId = null;
+};
+
+playPauseButton.addEventListener("click", (e) => {
+	if (isPaused()) {
+		play();
+	} else {
+		pause();
+	}
+});
 
 const bitIsSet = (n, arr) => {
 	const byte = Math.floor(n / 8);
@@ -57,12 +62,7 @@ const drawCells = () => {
 
 			ctx.fillStyle = bitIsSet(idx, cells) ? ALIVE_COLOR : DEAD_COLOR;
 
-			ctx.fillRect(
-				col * (CELL_SIZE + 1) + 1,
-				row * (CELL_SIZE + 1) + 1,
-				CELL_SIZE,
-				CELL_SIZE
-			);
+			ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 		}
 	}
 
@@ -73,9 +73,9 @@ const renderLoop = () => {
 	//canvas.textContent = universe.render();
 	universe.tick();
 
-	//drawGrid();
 	drawCells();
 
-	requestAnimationFrame(renderLoop);
+	animationId = requestAnimationFrame(renderLoop);
 };
-requestAnimationFrame(renderLoop);
+
+play();
