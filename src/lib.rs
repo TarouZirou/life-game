@@ -1,9 +1,16 @@
 extern crate fixedbitset;
 extern crate js_sys;
+extern crate web_sys;
 
 use fixedbitset::FixedBitSet;
 use std::fmt;
 use wasm_bindgen::prelude::*;
+
+macro_rules! log{
+	( $( $t:tt )* ) => {
+		web_sys::console::log_1(&format!( $( $t )* ).into());
+	};
+}
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -45,11 +52,12 @@ impl fmt::Display for Universe {
 	}
 }
 
+//フィールドはドーナツ型になっている
 #[wasm_bindgen]
 impl Universe {
 	pub fn new() -> Universe {
-		let width = 128;
-		let height = 128;
+		let width = 320;
+		let height = 240;
 
 		let size = (width * height) as usize;
 		let mut cells = FixedBitSet::with_capacity(size);
@@ -69,10 +77,6 @@ impl Universe {
 			height,
 			cells,
 		}
-	}
-
-	pub fn render(&self) -> String {
-		self.to_string()
 	}
 
 	pub fn get_index(&self, row: u32, col: u32) -> usize {
@@ -138,4 +142,29 @@ impl Universe {
 	pub fn cells(&self) -> *const usize {
 		self.cells.as_slice().as_ptr()
 	}
+
+	//Set the width of the universe.
+	pub fn set_width(&mut self, width: u32) {
+		self.width = width;
+
+		//reset all cells to the dead state.
+		let size = (width * self.height) as usize;
+		self.cells = FixedBitSet::with_capacity(size);
+	}
+
+	//Set the height if the universe.
+	pub fn set_height(&mut self, height: u32) {
+		self.height = height;
+
+		//reset all cells to the dead state.
+		let size = (self.width * height) as usize;
+		self.cells = FixedBitSet::with_capacity(size);
+	}
+
+	//get the Array of cells
+	fn get_cells(&self) -> &FixedBitSet {
+		&self.cells
+	}
+
+	fn set_cells(&mut self, cells: &[(u32, u32)]) {}
 }
