@@ -36,8 +36,8 @@ impl fmt::Display for Universe {
 #[wasm_bindgen]
 impl Universe {
 	pub fn new() -> Universe {
-		let width = 64;
-		let height = 64;
+		let width = 128;
+		let height = 128;
 
 		let cells = (0..width * height)
 			.map(|i| {
@@ -60,7 +60,7 @@ impl Universe {
 		self.to_string()
 	}
 
-	fn get_index(&self, row: u32, col: u32) -> usize {
+	pub fn get_index(&self, row: u32, col: u32) -> usize {
 		(row * self.width + col) as usize
 	}
 
@@ -113,5 +113,16 @@ impl Universe {
 		}
 
 		self.cells = next;
+	}
+
+	pub fn width(&self) -> u32 {
+		self.width
+	}
+	pub fn height(&self) -> u32 {
+		self.height
+	}
+
+	pub fn cells(&self) -> *const Cell {
+		self.cells.as_ptr()
 	}
 }
