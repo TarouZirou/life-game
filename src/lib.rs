@@ -6,11 +6,19 @@ use std::fmt;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-#[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
 	Dead = 0,
 	Alive = 1,
+}
+
+impl From<Cell> for bool {
+	fn from(cell: Cell) -> bool {
+		match cell {
+			Cell::Dead => false,
+			Cell::Alive => true,
+		}
+	}
 }
 
 /*
@@ -50,7 +58,7 @@ impl Universe {
 			cells.set(
 				i,
 				match js_sys::Math::random() {
-					x if x < 0.5 => false,
+					x if x < 0.5 => Cell::Dead.into(),
 					_ => true,
 				},
 			);
@@ -127,10 +135,10 @@ impl Universe {
 				next.set(
 					idx,
 					match (cell, live_neighbors) {
-						(true, x) if x < 2 => false,
-						(true, 2) | (true, 3) => true,
-						(true, x) if x > 3 => false,
-						(false, 3) => true,
+						(true, x) if x < 2 => Cell::Dead.into(),
+						(true, 2) | (true, 3) => Cell::Alive.into(),
+						(true, x) if x > 3 => Cell::Dead.into(),
+						(false, 3) => Cell::Alive.into(),
 						(otherwise, _) => otherwise,
 					},
 				);
