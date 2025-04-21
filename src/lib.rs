@@ -6,12 +6,6 @@ use fixedbitset::FixedBitSet;
 use std::fmt;
 use wasm_bindgen::prelude::*;
 
-macro_rules! log{
-	( $( $t:tt )* ) => {
-		web_sys::console::log_1(&format!( $( $t )* ).into());
-	};
-}
-
 #[wasm_bindgen]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cell {
@@ -28,6 +22,15 @@ impl From<Cell> for bool {
 	}
 }
 
+impl Cell {
+	fn toggle(&mut self) {
+		*self = match *self {
+			Cell::Dead => Cell::Alive,
+			Cell::Alive => Cell::Dead,
+		}
+	}
+}
+
 /*
 最終的に、
 [[Cell; width]; height] -> [Cell; width * height]
@@ -39,7 +42,7 @@ pub struct Universe {
 	cells: FixedBitSet,
 }
 
-impl fmt::Display for Universe {
+/*impl fmt::Display for Universe {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		for line in self.cells.as_slice().chunks(self.width as usize) {
 			for &cell in line {
@@ -50,7 +53,7 @@ impl fmt::Display for Universe {
 		}
 		Ok(())
 	}
-}
+}*/
 
 //フィールドはドーナツ型になっている
 #[wasm_bindgen]
@@ -78,6 +81,10 @@ impl Universe {
 			cells,
 		}
 	}
+
+	/*pub fn render(&self) -> String {
+		self.to_string()
+	}*/
 
 	pub fn get_index(&self, row: u32, col: u32) -> usize {
 		(row * self.width + col) as usize
@@ -161,10 +168,22 @@ impl Universe {
 		self.cells = FixedBitSet::with_capacity(size);
 	}
 
+	pub fn toggle_cell(&mut self, row: u32, col: u32) {
+		let idx = self.get_index(row, col);
+		self.cells.set(idx, !self.cells[idx]);
+	}
+}
+
+impl Universe {
 	//get the Array of cells
-	fn get_cells(&self) -> &FixedBitSet {
+	pub fn get_cells(&self) -> &FixedBitSet {
 		&self.cells
 	}
 
-	fn set_cells(&mut self, cells: &[(u32, u32)]) {}
+	pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+		for (row, col) in cells.iter().cloned() {
+			let idx = self.get_index(row, col);
+			self.cells.set(idx, Cell::Alive.into());
+		}
+	}
 }
